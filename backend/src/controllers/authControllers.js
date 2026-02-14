@@ -3,7 +3,7 @@ import { generateToken } from "../utils/token.js";
 import { storeRefreshToken } from "../utils/storeRefreshToken.js";
 import { setCookies } from "../utils/setCookies.js";
 import bcrypt from "bcryptjs";
-import { redis } from "../lib/redis.js";
+import { redisWrapper } from "../lib/redis.js";
 import jwt from "jsonwebtoken";
 
 export const signup = async (req, res) => {
@@ -30,7 +30,12 @@ export const signup = async (req, res) => {
     const { accessToken, refreshToken } = generateToken(user._id);
 
     // 5. Store refresh token
-    await storeRefreshToken(user._id, refreshToken);
+    try {
+      await storeRefreshToken(user._id, refreshToken);
+    } catch (redisError) {
+      console.log("Redis error during signup (continuing):", redisError.message);
+      // Continue with signup even if Redis storage fails
+    }
 
     // 6. Set cookies
     setCookies(res, refreshToken, accessToken);
@@ -68,7 +73,12 @@ export const login = async (req, res) => {
     console.log(4)
     const { accessToken, refreshToken } = generateToken(user._id);
     console.log(5);
-    await storeRefreshToken(user._id, refreshToken);
+    try {
+      await storeRefreshToken(user._id, refreshToken);
+    } catch (redisError) {
+      console.log("Redis error during login (continuing):", redisError.message);
+      // Continue with login even if Redis storage fails
+    }
     console.log(6)
     setCookies(res, refreshToken, accessToken);
     console.log(7)
@@ -89,11 +99,16 @@ export const logout = async (req, res) => {
   try {
     const refreshToken = req.cookies.refreshToken;
     if (refreshToken) {
-      const decoded = jwt.verify(
-        refreshToken,
-        process.env.REFRESH_TOKEN_SECRET
-      );
-      await redis.del(`refresh token :${decoded.userId}`);
+      try {
+        const decoded = jwt.verify(
+          refreshToken,
+          process.env.REFRESH_TOKEN_SECRET
+        );
+        await redisWrapper.del(`refresh token :${decoded.userId}`);
+      } catch (redisError) {
+        console.log("Redis error during logout (non-blocking):", redisError.message);
+        // Continue with logout even if Redis fails
+      }
     }
     res.clearCookie("refreshToken");
     res.clearCookie("accessToken");
@@ -104,7 +119,6 @@ export const logout = async (req, res) => {
   }
 };
 
-//this will recreate an access token
 export const refreshToken = async (req, res) => {
   try {
     const refreshToken = req.cookies.refreshToken;
@@ -117,9 +131,14 @@ export const refreshToken = async (req, res) => {
       process.env.REFRESH_TOKEN_SECRET
     );
 
-    const storedToken = await redis.get(`refresh token :${decoded.userId}`);
-    if (storedToken !== refreshToken) {
-      return res.status(400).json({ message: "Invalid refresh token" }); // ✅ return here
+    try {
+      const storedToken = await redisWrapper.get(`refresh token :${decoded.userId}`);
+      if (storedToken !== refreshToken) {
+        return res.status(400).json({ message: "Invalid refresh token" }); // ✅ return here
+      }
+    } catch (redisError) {
+      console.log("Redis error during token verification (allowing):", redisError.message);
+      // Continue without Redis verification if Redis is down
     }
 
     const accessToken = await jwt.sign(
@@ -134,6 +153,9 @@ export const refreshToken = async (req, res) => {
       sameSite: "strict",
       maxAge: 15 * 60 * 1000,
     });
+
+    // Get user info
+    const user = await User.findById(decoded.userId);
 
     return res.json({
       _id: user._id,
