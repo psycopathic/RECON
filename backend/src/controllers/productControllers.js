@@ -1,5 +1,5 @@
 import Product from "../models/productModel.js";
-import { redis } from "../lib/redis.js";
+import { redisWrapper as redis } from "../lib/redis.js";
 import cloudinary  from "../lib/cloudinary.js";
 export const getAllProducts = async (req, res) => {
   try {
@@ -13,13 +13,15 @@ export const getAllProducts = async (req, res) => {
 
 export const getFeaturedProducts = async (req, res) => {
   try {
+    console.log("getFeaturedProducts controller called");
     let featuredProducts = await redis.get("featuredProduct");
+    console.log("featuredProducts from redis:", featuredProducts);
     if (featuredProducts) {
       return res.json(JSON.parse(featuredProducts));
     }
     //.lean() is used to convert the mongoose object to a plain javascript object
     featuredProducts = await Product.find({ isFeatured: true }).lean();
-    if (!featuredProducts) {
+    if (!featuredProducts || featuredProducts.length === 0) {
       return res.status(404).json({ message: "No featured products found" });
     }
     //store in redis for future quick access

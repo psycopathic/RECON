@@ -77,7 +77,7 @@ const ProductList = () => {
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
                 <div className="text-sm text-gray-300">
-                  ${product.price.toFixed(2)}
+                  Rs{product.price.toFixed(2)}
                 </div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
@@ -86,13 +86,18 @@ const ProductList = () => {
               <td className="px-6 py-4 whitespace-nowrap">
                 <button
                   onClick={() => toggleFeaturedProduct(product._id)}
-                  className={`p-1 rounded-full ${
+                  className={`p-2 rounded-full ${
                     product.isFeatured
                       ? "bg-yellow-400 text-gray-900"
                       : "bg-gray-600 text-gray-300"
                   } hover:bg-yellow-500 transition-colors duration-200`}
+                  aria-label="Toggle featured"
                 >
-                  <Star className="h-5 w-5" />
+                  {product.isFeatured ? (
+                    <Star className="h-5 w-5" fill="currentColor" strokeWidth={2} />
+                  ) : (
+                    <Star className="h-5 w-5" strokeWidth={2} />
+                  )}
                 </button>
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
