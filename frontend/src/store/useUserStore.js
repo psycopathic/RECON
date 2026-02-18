@@ -7,7 +7,7 @@ export const useUserStore = create((set, get) => ({
   loading: false,
   checkingAuth: true,
 
-  signup: async ({ name, email, password, confirmPassword }) => {
+  signup: async ({ name, email, password, confirmPassword, role }) => {
     console.log("it is hitting the backend");
     set({ loading: true });
 
@@ -16,7 +16,7 @@ export const useUserStore = create((set, get) => ({
       return toast.error("password does not match");
     }
     try {
-      const res = await axios.post("auth/signup", { name, email, password });
+      const res = await axios.post("auth/signup", { name, email, password, role });
       set({ user: res.data, loading: false });
     } catch (error) {
       set({ loading: false });
