@@ -9,11 +9,16 @@ import jwt from "jsonwebtoken";
 export const signup = async (req, res) => {
   try {
     // 1. Input validation
-    const { email, password, name } = req.body;
-    if (!email || !password || !name) {
+    const { email, password, name, role } = req.body;
+    if (!email || !password || !name || !role) {
       return res.status(400).send("Please fill all the fields");
     }
 
+    // check for valid role
+    const allowedRoles = ["user", "vendor"];
+    if(!allowedRoles.includes(role)) {
+      return res.status(400).send("Invalid role. Allowed roles are 'user' and 'vendor'");
+    }
     // 2. Check if user already exists
     const userExists = await User.findOne({ email });
     // console.log(userExists);

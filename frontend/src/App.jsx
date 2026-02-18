@@ -16,6 +16,7 @@ import { useCartStore } from "./store/useCartStore";
 import LoadingSpinner from "./components/LoadingSpinner";
 
 import { Toaster } from "react-hot-toast";
+import Profile from "./pages/Profile";
 function App() {
   const {user, checkAuth, checkingAuth} = useUserStore();
   const {getCartItem} = useCartStore();
@@ -39,6 +40,7 @@ function App() {
             <Route path="/" element={<Homepage />} />
             <Route path="/signup" element={!user?<Signupage />:<Navigate to="/" />} />
             <Route path="/login" element={!user ? (<Loginpage />) : (<Navigate to="/" />)}/>
+            <Route path="/profile" element={<Profile />}/>
 
             <Route path="/secretDashboard" element={user && user.role === "admin"?<Adminpage/>:<Navigate to="/login" />} />
             <Route path='/category/:category' element={<CategoryPage />}/>
