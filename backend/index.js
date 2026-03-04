@@ -1,6 +1,18 @@
 import express from 'express';
 import dotenv from 'dotenv';
-dotenv.config();
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Load .env file in development, use Render's env vars in production
+if (process.env.NODE_ENV !== 'production') {
+    dotenv.config({ path: path.join(__dirname, '.env') });
+} else {
+    // In production (Render), env vars are already set, just call config without path
+    dotenv.config();
+}
 
 import authRouter from './src/routes/authRoutes.js';
 import productRouter from './src/routes/productRoutes.js';
@@ -12,13 +24,6 @@ import analyticsRouter from './src/routes/analyticsRoutes.js';
 import cors from 'cors';
 import { connectDB } from './src/lib/db.js';
 import cookieParser from 'cookie-parser';
-import path from 'path';
-import { fileURLToPath } from 'url';
-
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-dotenv.config({ path: path.join(__dirname, '.env') });
 
 const app = express();
 const port = process.env.PORT || 5000;
