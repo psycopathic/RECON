@@ -44,10 +44,6 @@ app.use('/api/coupon', couponRouter);
 app.use('/api/payment', paymentRouter);
 app.use('/api/analytics', analyticsRouter);
 
-app.get('/', (req, res) => {
-    res.send('Hello World!')
-})
-
 if(process.env.NODE_ENV === "production") {
     const distPath = path.join(__dirname, '../frontend/dist');
     app.get('*', (req, res) => {
