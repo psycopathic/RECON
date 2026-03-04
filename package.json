@@ -1,7 +1,29 @@
 {
+  "name": "e-com",
+  "version": "1.0.0",
+  "description": "This repository contains a small e‑commerce example app with a React + Vite frontend and a Node/Express backend.",
+  "main": "index.js",
+  "scripts": {
+    "dev":"cd backend && nodemon index.js",
+    "start":"cd backend && node index.js",
+    "build":"npm install --prefix backend && npm install --prefix frontend && npm run build --prefix frontend"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/psycopathic/RECON.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/psycopathic/RECON/issues"
+  },
+  "homepage": "https://github.com/psycopathic/RECON#readme",
   "dependencies": {
-    "react": "^19.2.4",
-    "react-dom": "^19.2.4",
-    "react-spinners": "^0.17.0"
+    "nodemon": "^3.1.14"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
   }
 }
