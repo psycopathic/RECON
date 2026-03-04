@@ -27,23 +27,21 @@ const GiftCouponCard = () => {
 
 	return (
 		<motion.div
-			className='space-y-4 rounded-lg border border-gray-700 bg-gray-800 p-4 shadow-sm sm:p-6'
+			className="glass-card rounded-2xl p-6"
 			initial={{ opacity: 0, y: 20 }}
 			animate={{ opacity: 1, y: 0 }}
 			transition={{ duration: 0.5, delay: 0.2 }}
 		>
-			<div className='space-y-4'>
+			<div className="space-y-4">
 				<div>
-					<label htmlFor='voucher' className='mb-2 block text-sm font-medium text-gray-300'>
+					<label htmlFor="voucher" className="block text-sm font-medium text-slate-300 mb-2">
 						Do you have a voucher or gift card?
 					</label>
 					<input
-						type='text'
-						id='voucher'
-						className='block w-full rounded-lg border border-gray-600 bg-gray-700 
-            p-2.5 text-sm text-white placeholder-gray-400 focus:border-sky-500 
-            focus:ring-sky-500'
-						placeholder='Enter code here'
+						type="text"
+						id="voucher"
+						className="w-full py-2.5 px-4 bg-slate-800/60 border border-white/10 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-sky-500/50 focus:ring-1 focus:ring-sky-500/30 transition-all"
+						placeholder="Enter code here"
 						value={userInputCode}
 						onChange={(e) => setUserInputCode(e.target.value)}
 						required
@@ -51,30 +49,27 @@ const GiftCouponCard = () => {
 				</div>
 
 				<motion.button
-					type='button'
-				className='flex w-full items-center justify-center rounded-lg bg-sky-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-sky-700 focus:outline-none focus:ring-4 focus:ring-sky-300'
-					whileHover={{ scale: 1.05 }}
-					whileTap={{ scale: 0.95 }}
+					type="button"
+					className="w-full flex items-center justify-center rounded-xl bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 py-2.5 text-sm font-medium text-white transition-all duration-300 shadow-lg shadow-sky-500/20"
+					whileHover={{ scale: 1.02 }}
+					whileTap={{ scale: 0.98 }}
 					onClick={handleApplyCoupon}
 				>
 					Apply Code
 				</motion.button>
 			</div>
+
 			{isCouponApplied && coupon && (
-				<div className='mt-4'>
-					<h3 className='text-lg font-medium text-gray-300'>Applied Coupon</h3>
-
-					<p className='mt-2 text-sm text-gray-400'>
-						{coupon.code} - {coupon.discountPercentage}% off
+				<div className="mt-4 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+					<h3 className="text-sm font-medium text-emerald-400">Applied Coupon</h3>
+					<p className="mt-1 text-xs text-slate-400">
+						{coupon.code} — {coupon.discountPercentage}% off
 					</p>
-
 					<motion.button
-						type='button'
-						className='mt-2 flex w-full items-center justify-center rounded-lg bg-red-600 
-            px-5 py-2.5 text-sm font-medium text-white hover:bg-red-700 focus:outline-none
-             focus:ring-4 focus:ring-red-300'
-						whileHover={{ scale: 1.05 }}
-						whileTap={{ scale: 0.95 }}
+						type="button"
+						className="mt-2 w-full flex items-center justify-center rounded-xl bg-red-500/20 border border-red-500/30 py-2 text-sm font-medium text-red-400 hover:bg-red-500/30 transition-all"
+						whileHover={{ scale: 1.02 }}
+						whileTap={{ scale: 0.98 }}
 						onClick={handleRemoveCoupon}
 					>
 						Remove Coupon
@@ -82,15 +77,16 @@ const GiftCouponCard = () => {
 				</div>
 			)}
 
-			{coupon && (
-				<div className='mt-4'>
-					<h3 className='text-lg font-medium text-gray-300'>Your Available Coupon:</h3>
-					<p className='mt-2 text-sm text-gray-400'>
-						{coupon.code} - {coupon.discountPercentage}% off
+			{coupon && !isCouponApplied && (
+				<div className="mt-4 p-3 rounded-xl bg-sky-500/10 border border-sky-500/20">
+					<h3 className="text-sm font-medium text-sky-400">Your Available Coupon</h3>
+					<p className="mt-1 text-xs text-slate-400">
+						{coupon.code} — {coupon.discountPercentage}% off
 					</p>
 				</div>
 			)}
 		</motion.div>
 	);
 };
+
 export default GiftCouponCard;

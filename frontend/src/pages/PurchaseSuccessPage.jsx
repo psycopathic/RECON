@@ -5,17 +5,16 @@ import { Link } from "react-router-dom";
 import { useCartStore } from "../store/useCartStore";
 import axios from "../lib/axios";
 import Confetti from "react-confetti";
+
 const PurchaseSuccessPage = () => {
-    const [isProcessing, setIsProcessing] = useState(true);
+	const [isProcessing, setIsProcessing] = useState(true);
 	const { clearCart } = useCartStore();
 	const [error, setError] = useState(null);
 
-    useEffect(() => {
+	useEffect(() => {
 		const handleCheckoutSuccess = async (sessionId) => {
 			try {
-				await axios.post("/payment/checkoutSuccess", {
-					sessionId,
-				});
+				await axios.post("/payment/checkoutSuccess", { sessionId });
 				clearCart();
 			} catch (error) {
 				console.log(error);
@@ -33,12 +32,20 @@ const PurchaseSuccessPage = () => {
 		}
 	}, [clearCart]);
 
-	if (isProcessing) return "Processing...";
+	if (isProcessing) return (
+		<div className="min-h-screen flex items-center justify-center">
+			<div className="w-10 h-10 border-3 border-slate-700 border-t-sky-500 rounded-full animate-spin" />
+		</div>
+	);
 
-	if (error) return `Error: ${error}`;
+	if (error) return (
+		<div className="min-h-screen flex items-center justify-center">
+			<p className="text-red-400">{error}</p>
+		</div>
+	);
 
-  return (
-    <div className='h-screen flex items-center justify-center px-4'>
+	return (
+		<div className="min-h-screen flex items-center justify-center px-4">
 			<Confetti
 				width={window.innerWidth}
 				height={window.innerHeight}
@@ -48,53 +55,51 @@ const PurchaseSuccessPage = () => {
 				recycle={false}
 			/>
 
-			<div className='max-w-md w-full bg-gray-800 rounded-lg shadow-xl overflow-hidden relative z-10'>
-				<div className='p-6 sm:p-8'>
-					<div className='flex justify-center'>
-						<CheckCircle className='text-sky-400 w-16 h-16 mb-4' />
+			<div className="max-w-md w-full glass-card rounded-2xl overflow-hidden relative z-10">
+				<div className="p-8">
+					<div className="flex justify-center mb-4">
+						<div className="p-4 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+							<CheckCircle className="text-emerald-400 w-12 h-12" />
+						</div>
 					</div>
-					<h1 className='text-2xl sm:text-3xl font-bold text-center text-sky-400 mb-2'>
+					<h1 className="text-2xl sm:text-3xl font-black text-center text-gradient mb-2">
 						Purchase Successful!
 					</h1>
-
-					<p className='text-gray-300 text-center mb-2'>
+					<p className="text-slate-400 text-center text-sm mb-1">
 						Thank you for your order. {"We're"} processing it now.
 					</p>
-				<p className='text-sky-400 text-center text-sm mb-6'>
-					Check your email for order details and updates.
-				</p>
-				<div className='bg-gray-700 rounded-lg p-4 mb-6'>
-					<div className='flex items-center justify-between mb-2'>
-						<span className='text-sm text-gray-400'>Order number</span>
-						<span className='text-sm font-semibold text-sky-400'>#12345</span>
-					</div>
-					<div className='flex items-center justify-between'>
-						<span className='text-sm text-gray-400'>Estimated delivery</span>
-						<span className='text-sm font-semibold text-sky-400'>3-5 business days</span>
-				</div>
-			</div>
+					<p className="text-sky-400 text-center text-xs mb-6">
+						Check your email for order details and updates.
+					</p>
 
-			<div className='space-y-4'>
-				<button
-					className='w-full bg-sky-600 hover:bg-sky-700 text-white font-bold py-2 px-4
-             rounded-lg transition duration-300 flex items-center justify-center'
-				>
-					<HandHeart className='mr-2' size={18} />
-					Thanks for trusting us!
-				</button>
-				<Link
-					to={"/"}
-					className='w-full bg-gray-700 hover:bg-gray-600 text-sky-400 font-bold py-2 px-4 
-            rounded-lg transition duration-300 flex items-center justify-center'
-				>
+					<div className="bg-slate-800/50 rounded-xl p-4 mb-6 border border-white/5">
+						<div className="flex items-center justify-between mb-2">
+							<span className="text-xs text-slate-500">Order number</span>
+							<span className="text-xs font-semibold text-sky-400">#12345</span>
+						</div>
+						<div className="flex items-center justify-between">
+							<span className="text-xs text-slate-500">Estimated delivery</span>
+							<span className="text-xs font-semibold text-sky-400">3-5 business days</span>
+						</div>
+					</div>
+
+					<div className="space-y-3">
+						<button className="w-full bg-gradient-to-r from-sky-600 to-indigo-600 text-white font-medium py-2.5 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 text-sm shadow-lg shadow-sky-500/20">
+							<HandHeart size={18} />
+							Thanks for trusting us!
+						</button>
+						<Link
+							to="/"
+							className="w-full bg-slate-800/50 border border-white/10 hover:border-sky-500/20 text-sky-400 font-medium py-2.5 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 text-sm"
+						>
 							Continue Shopping
-							<ArrowRight className='ml-2' size={18} />
+							<ArrowRight size={16} />
 						</Link>
 					</div>
 				</div>
 			</div>
 		</div>
-  )
+	);
 }
 
-export default PurchaseSuccessPage
+export default PurchaseSuccessPage;

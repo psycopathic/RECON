@@ -35,7 +35,7 @@ function App() {
 
   return (
     <>
-      <div className="min-h-screen bg-white text-sky-600 relative overflow-hidden">
+      <div className="min-h-screen bg-slate-900 text-slate-100 relative overflow-hidden">
         <div className="relative z-50">
           <Navbar />
           <Routes>
