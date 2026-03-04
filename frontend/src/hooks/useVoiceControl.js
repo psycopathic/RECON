@@ -56,8 +56,12 @@ export const useVoiceControl = () => {
                 lower === "go to cart" ||
                 lower === "show cart" ||
                 lower === "cart" ||
+                lower === "go to guard" ||
+                lower === "go to gaurd" ||
                 lower.includes("open cart") ||
-                lower.includes("go to cart")
+                lower.includes("go to cart") ||
+                lower.includes("go to guard") ||
+                lower.includes("open gaurd")
             ) {
                 navigate("/cart");
                 return;
@@ -168,8 +172,12 @@ export const useVoiceControl = () => {
             recognizer.on("result", (message) => {
                 console.log("[VoiceControl] Final result:", JSON.stringify(message));
                 const text = message?.result?.text;
+                console.log("[VoiceControl] Recognized text:", text);
                 if (text && text.trim().length > 0) {
+                    console.log("[VoiceControl] About to process:", text);
                     processCommand(text);
+                } else {
+                    console.log("[VoiceControl] Empty or no text recognized");
                 }
             });
 
