@@ -1,6 +1,6 @@
 import Product from "../models/productModel.js";
 import { redisWrapper as redis } from "../lib/redis.js";
-import cloudinary  from "../lib/cloudinary.js";
+import cloudinary from "../lib/cloudinary.js";
 export const getAllProducts = async (req, res) => {
   try {
     const products = await Product.find({});
@@ -13,9 +13,7 @@ export const getAllProducts = async (req, res) => {
 
 export const getFeaturedProducts = async (req, res) => {
   try {
-    console.log("getFeaturedProducts controller called");
     let featuredProducts = await redis.get("featuredProduct");
-    console.log("featuredProducts from redis:", featuredProducts);
     if (featuredProducts) {
       return res.json(JSON.parse(featuredProducts));
     }
@@ -86,51 +84,68 @@ export const deleteProducts = async (req, res) => {
   }
 };
 
-export const getRecommendedProducts = async (req,res) =>{
-    try {
-        const product = await Product.aggregate([
-            {
-                $sample:({ size: 4 })
-            },
-            {
-                $project:{
-                    _id:1,
-                    name:1,
-                    description:1,
-                    image:1,
-                    price:1
-                }
-            }
-        ])
-        res.json(product);
-    } catch (error) {
-        console.log("Error in getRecommendedProducts controller", error.message);
-		res.status(500).json({ message: "Server error", error: error.message });
-    }
+export const getRecommendedProducts = async (req, res) => {
+  try {
+    const product = await Product.aggregate([
+      {
+        $sample: ({ size: 4 })
+      },
+      {
+        $project: {
+          _id: 1,
+          name: 1,
+          description: 1,
+          image: 1,
+          price: 1
+        }
+      }
+    ])
+    res.json(product);
+  } catch (error) {
+    console.log("Error in getRecommendedProducts controller", error.message);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
 }
 
 
-export const getProductByCategory = async (req, res) =>{
-    const {category} = req.params;
-    try {
-		const products = await Product.find({ category });
-		res.json({ products });
-	} catch (error) {
-		console.log("Error in getProductsByCategory controller", error.message);
-		res.status(500).json({ message: "Server error", error: error.message });
-	}
+export const searchProducts = async (req, res) => {
+  try {
+    const { q } = req.query;
+    if (!q || q.trim().length === 0) {
+      return res.json([]);
+    }
+    const regex = new RegExp(q.trim(), "i");
+    const products = await Product.find({
+      $or: [{ name: regex }, { description: regex }],
+    });
+    res.json(products);
+  } catch (error) {
+    console.log("Error in searchProducts controller", error.message);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+export const getProductByCategory = async (req, res) => {
+  const { category } = req.params;
+  try {
+    const products = await Product.find({ category });
+    res.json({ products });
+  } catch (error) {
+    console.log("Error in getProductsByCategory controller", error.message);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
 }
 
 export const toggleFeaturedProduct = async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
-    if(product){
-        product.isFeatured = !product.isFeatured;
-        const updatedProduct = await product.save();
-        await updateFeatureProductCache();
-        res.json(updatedProduct);
-    }else{
-        return res.status(404).json({ message: "Product not found" });
+    if (product) {
+      product.isFeatured = !product.isFeatured;
+      const updatedProduct = await product.save();
+      await updateFeatureProductCache();
+      res.json(updatedProduct);
+    } else {
+      return res.status(404).json({ message: "Product not found" });
     }
   } catch (error) {
     console.log("Error in toggleFeaturedProduct controller", error.message);
@@ -138,11 +153,11 @@ export const toggleFeaturedProduct = async (req, res) => {
   }
 };
 
-async function updateFeatureProductCache(){
-    try {
-        const featuredProducts = await Product.find({ isFeatured: true }).lean();
-        await redis.set("featuredProduct", JSON.stringify(featuredProducts));
-    } catch (error) {
-        console.log("error in update cache function");
-    }
+async function updateFeatureProductCache() {
+  try {
+    const featuredProducts = await Product.find({ isFeatured: true }).lean();
+    await redis.set("featuredProduct", JSON.stringify(featuredProducts));
+  } catch (error) {
+    console.log("error in update cache function");
+  }
 }
