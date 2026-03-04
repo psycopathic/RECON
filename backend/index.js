@@ -2,6 +2,15 @@ import express from 'express';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import authRouter from './src/routes/authRoutes.js';
+import productRouter from './src/routes/productRoutes.js';
+import cartRouter from './src/routes/cartRoutes.js';
+import couponRouter from './src/routes/couponRoutes.js';
+import paymentRouter from './src/routes/paymentRoutes.js';
+import analyticsRouter from './src/routes/analyticsRoutes.js';
+import cors from 'cors';
+import { connectDB } from './src/lib/db.js';
+import cookieParser from 'cookie-parser';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -13,17 +22,6 @@ if (process.env.NODE_ENV !== 'production') {
     // In production (Render), env vars are already set, just call config without path
     dotenv.config();
 }
-
-import authRouter from './src/routes/authRoutes.js';
-import productRouter from './src/routes/productRoutes.js';
-import cartRouter from './src/routes/cartRoutes.js';
-import couponRouter from './src/routes/couponRoutes.js';
-import paymentRouter from './src/routes/paymentRoutes.js';
-import analyticsRouter from './src/routes/analyticsRoutes.js';
-
-import cors from 'cors';
-import { connectDB } from './src/lib/db.js';
-import cookieParser from 'cookie-parser';
 
 const app = express();
 const port = process.env.PORT || 5000;
