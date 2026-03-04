@@ -7,6 +7,7 @@ import {
   getRecommendedProducts,
   getProductByCategory,
   toggleFeaturedProduct,
+  searchProducts,
 } from "../controllers/productControllers.js";
 import {
   protectedRoutes,
@@ -15,6 +16,7 @@ import {
 const router = express.Router();
 
 router.get("/", protectedRoutes, adminRoute, getAllProducts);
+router.get("/search", searchProducts);
 router.get("/featured", getFeaturedProducts);
 router.get("/category/:category", getProductByCategory);
 router.get("/recommendations", getRecommendedProducts);

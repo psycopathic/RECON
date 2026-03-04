@@ -16,7 +16,6 @@ export const useUserStore = create((set, get) => ({
       return toast.error("password does not match");
     }
     try {
-		
       const res = await axios.post("auth/signup", { name, email, password, role });
       set({ user: res.data, loading: false });
     } catch (error) {
