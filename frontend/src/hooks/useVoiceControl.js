@@ -50,19 +50,15 @@ export const useVoiceControl = () => {
                 }
             }
 
-            // 2. Cart commands
-            if (
-                lower === "open cart" ||
-                lower === "go to cart" ||
-                lower === "show cart" ||
+            // 2. Cart commands (includes common speech-to-text mishears)
+            const cartAliases = ["cart", "card", "guard", "gaurd"];
+            const isCartIntent =
                 lower === "cart" ||
-                lower === "go to guard" ||
-                lower === "go to gaurd" ||
-                lower.includes("open cart") ||
-                lower.includes("go to cart") ||
-                lower.includes("go to guard") ||
-                lower.includes("open gaurd")
-            ) {
+                cartAliases.some((alias) =>
+                    new RegExp(`\\b(?:open|show|go to)\\s+${alias}\\b`).test(lower)
+                );
+
+            if (isCartIntent) {
                 navigate("/cart");
                 return;
             }
@@ -103,12 +99,35 @@ export const useVoiceControl = () => {
                 return;
             }
 
-            // 6. Category commands: "show <category>"
+            // 6. Category commands: "open/show/browse/view/go to <category>"
+            const categoryAliases = {
+                jeans: "jeans",
+                "t shirt": "t-shirts",
+                "t shirts": "t-shirts",
+                tshirt: "t-shirts",
+                tshirts: "t-shirts",
+                "tee shirt": "t-shirts",
+                "tee shirts": "t-shirts",
+                glasses: "glasses",
+                jackets: "jackets",
+                suits: "suits",
+                gadgets: "gadgets",
+                watches: "watches",
+                accessories: "accessories",
+            };
+
             const categoryMatch = lower.match(
-                /^(?:show|browse|view)\s+(.+)$/
+                /^(?:open|show|browse|view|go to)\s+(.+)$/
             );
             if (categoryMatch) {
-                const category = categoryMatch[1].trim().replace(/\s+/g, "-");
+                const rawCategory = categoryMatch[1]
+                    .trim()
+                    .replace(/[^a-z\s-]/g, "")
+                    .replace(/\s+/g, " ");
+
+                const category =
+                    categoryAliases[rawCategory] || rawCategory.replace(/\s+/g, "-");
+
                 navigate(`/category/${encodeURIComponent(category)}`);
                 return;
             }
