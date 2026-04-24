@@ -1,29 +1,26 @@
 {
-  "name": "e-com",
-  "version": "1.0.0",
-  "description": "This repository contains a small e‑commerce example app with a React + Vite frontend and a Node/Express backend.",
-  "main": "index.js",
+  "type": "module",
   "scripts": {
-    "dev":"cd backend && nodemon index.js",
-    "start":"cd backend && node index.js",
-    "build":"npm install --prefix backend && npm install --prefix frontend && npm run build --prefix frontend"
+    "start": "cd backend && node index.js",
+    "dev": "cd backend && nodemon index.js",
+    "seed": "cd backend && node ./seeds/seedCategories.js"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/psycopathic/RECON.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
-  "bugs": {
-    "url": "https://github.com/psycopathic/RECON/issues"
-  },
-  "homepage": "https://github.com/psycopathic/RECON#readme",
   "dependencies": {
-    "nodemon": "^3.1.14"
+    "bcrypt": "^6.0.0",
+    "bcryptjs": "^3.0.2",
+    "cloudinary": "^2.7.0",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.0",
+    "express": "^5.1.0",
+    "ioredis": "^5.6.1",
+    "jsonwebtoken": "^9.0.2",
+    "mongodb": "^6.17.0",
+    "mongoose": "^8.16.3",
+    "multer": "^2.0.2",
+    "stripe": "^18.3.0"
   },
   "devDependencies": {
-    "concurrently": "^9.2.1"
+    "nodemon": "^3.1.10"
   }
 }

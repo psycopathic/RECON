@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCartStore } from "../store/useCartStore";
+import { voiceCategoryAliases } from "../constants/categories";
 import { useProductStore } from "../store/useProductStore";
 
 const MODEL_PATH = "/models/vosk-model-small-en-us.tar.gz";
@@ -100,22 +101,6 @@ export const useVoiceControl = () => {
             }
 
             // 6. Category commands: "open/show/browse/view/go to <category>"
-            const categoryAliases = {
-                jeans: "jeans",
-                "t shirt": "t-shirts",
-                "t shirts": "t-shirts",
-                tshirt: "t-shirts",
-                tshirts: "t-shirts",
-                "tee shirt": "t-shirts",
-                "tee shirts": "t-shirts",
-                glasses: "glasses",
-                jackets: "jackets",
-                suits: "suits",
-                gadgets: "gadgets",
-                watches: "watches",
-                accessories: "accessories",
-            };
-
             const categoryMatch = lower.match(
                 /^(?:open|show|browse|view|go to)\s+(.+)$/
             );
@@ -126,7 +111,7 @@ export const useVoiceControl = () => {
                     .replace(/\s+/g, " ");
 
                 const category =
-                    categoryAliases[rawCategory] || rawCategory.replace(/\s+/g, "-");
+                    voiceCategoryAliases[rawCategory] || rawCategory.replace(/\s+/g, "-");
 
                 navigate(`/category/${encodeURIComponent(category)}`);
                 return;
