@@ -49,7 +49,7 @@ app.use('/api/analytics', analyticsRouter);
 
 if(process.env.NODE_ENV === "production") {
     const distPath = path.join(__dirname, '../frontend/dist');
-    app.get('*', (req, res) => {
+    app.get(/^(?!\/api).*/, (req, res) => {
         res.sendFile(path.join(distPath, 'index.html'));
     });
 } else {
