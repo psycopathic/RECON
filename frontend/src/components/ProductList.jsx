@@ -4,108 +4,67 @@ import { useProductStore } from "../store/useProductStore";
 import { motion } from "framer-motion";
 
 const ProductList = () => {
-  const { deleteProduct, toggleFeaturedProduct, products, fetchAllProducts } =
-    useProductStore();
-  useEffect(() => {
-    console.log("running fetchAllProducts");
-    fetchAllProducts();
-  }, [fetchAllProducts]); // run once on mount
+  const { deleteProduct, toggleFeaturedProduct, products, fetchAllProducts } = useProductStore();
 
-  console.log("products:", products);
+  useEffect(() => {
+    fetchAllProducts();
+  }, [fetchAllProducts]);
+
   return (
     <motion.div
-      className="bg-gray-800 shadow-lg rounded-lg overflow-hidden max-w-4xl mx-auto"
+      className="glass-card rounded-2xl overflow-hidden max-w-4xl mx-auto"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.8 }}
+      transition={{ duration: 0.6 }}
     >
-      <table className=" min-w-full divide-y divide-gray-700">
-        <thead className="bg-gray-700">
+      <table className="min-w-full divide-y divide-white/5">
+        <thead className="bg-slate-800/50">
           <tr>
-            <th
-              scope="col"
-              className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider"
-            >
-              Product
-            </th>
-            <th
-              scope="col"
-              className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider"
-            >
-              Price
-            </th>
-            <th
-              scope="col"
-              className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider"
-            >
-              Category
-            </th>
-
-            <th
-              scope="col"
-              className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider"
-            >
-              Featured
-            </th>
-            <th
-              scope="col"
-              className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider"
-            >
-              Actions
-            </th>
+            {["Product", "Price", "Category", "Featured", "Actions"].map((header) => (
+              <th key={header} scope="col" className="px-6 py-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                {header}
+              </th>
+            ))}
           </tr>
         </thead>
 
-        <tbody className="bg-gray-800 divide-y divide-gray-700">
+        <tbody className="divide-y divide-white/5">
           {products?.map((product) => (
-            <tr key={product._id} className="hover:bg-gray-700">
+            <tr key={product._id} className="hover:bg-white/[0.02] transition-colors">
               <td className="px-6 py-4 whitespace-nowrap">
                 <div className="flex items-center">
-                  <div className="flex-shrink-0 h-10 w-10">
-                    <img
-                      className="h-10 w-10 rounded-full object-cover"
-                      src={product.image}
-                      alt={product.name}
-                    />
-                  </div>
-                  <div className="ml-4">
-                    <div className="text-sm font-medium text-white">
-                      {product.name}
-                    </div>
+                  <img className="h-10 w-10 rounded-xl object-cover" src={product.image} alt={product.name} />
+                  <div className="ml-3">
+                    <div className="text-sm font-medium text-white">{product.name}</div>
                   </div>
                 </div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
-                <div className="text-sm text-gray-300">
-                  Rs{product.price.toFixed(2)}
-                </div>
+                <div className="text-sm text-slate-300">₹{product.price.toFixed(2)}</div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
-                <div className="text-sm text-gray-300">{product.category}</div>
+                <span className="text-xs px-2.5 py-1 rounded-full bg-slate-800 text-slate-300 border border-white/5">
+                  {product.category}
+                </span>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
                 <button
                   onClick={() => toggleFeaturedProduct(product._id)}
-                  className={`p-2 rounded-full ${
-                    product.isFeatured
-                      ? "bg-yellow-400 text-gray-900"
-                      : "bg-gray-600 text-gray-300"
-                  } hover:bg-yellow-500 transition-colors duration-200`}
+                  className={`p-2 rounded-xl transition-all duration-300 ${product.isFeatured
+                      ? "bg-amber-500/20 text-amber-400 border border-amber-500/20"
+                      : "bg-slate-800/50 text-slate-500 border border-white/5 hover:text-amber-400"
+                    }`}
                   aria-label="Toggle featured"
                 >
-                  {product.isFeatured ? (
-                    <Star className="h-5 w-5" fill="currentColor" strokeWidth={2} />
-                  ) : (
-                    <Star className="h-5 w-5" strokeWidth={2} />
-                  )}
+                  <Star className="h-4 w-4" fill={product.isFeatured ? "currentColor" : "none"} strokeWidth={2} />
                 </button>
               </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+              <td className="px-6 py-4 whitespace-nowrap">
                 <button
                   onClick={() => deleteProduct(product._id)}
-                  className="text-red-400 hover:text-red-300"
+                  className="p-2 rounded-xl text-red-400 hover:bg-red-500/10 transition-all"
                 >
-                  <Trash className="h-5 w-5" />
+                  <Trash className="h-4 w-4" />
                 </button>
               </td>
             </tr>

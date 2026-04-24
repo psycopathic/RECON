@@ -5,97 +5,91 @@ export default function Footer() {
   const navigate = useNavigate();
 
   return (
-    <footer className="bg-linear-to-br from-[#1f1f1f] to-[#0f0f0f] w-full text-gray-300 z-40 py-12 border-t border-gray-700">
-      <div
-        className="max-w-7xl mx-auto px-6 grid gap-10 text-center md:text-left"
-        
-      >
-        {/* Brand */}
-        <div className="space-y-3">
-          <h2
-            onClick={() => navigate("/")}
-            className="text-white text-3xl font-bold cursor-pointer tracking-wide hover:text-blue-400 transition"
-          >
-            RE-CON
-          </h2>
+    <footer className="relative bg-slate-950 w-full text-slate-400 z-40 border-t border-white/5">
+      {/* Top Glow Line */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/2 h-px bg-gradient-to-r from-transparent via-sky-500/50 to-transparent" />
 
-          <p className="text-sm leading-relaxed text-gray-400">
-            Smart, secure & scalable multi-vendor eCommerce platform built
-            for performance and growth.
-          </p>
+      <div className="max-w-7xl mx-auto px-6 py-14">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
+          {/* Brand */}
+          <div className="space-y-4">
+            <h2
+              onClick={() => navigate("/")}
+              className="text-3xl font-black cursor-pointer text-gradient"
+            >
+              RE-CON
+            </h2>
+            <p className="text-sm leading-relaxed text-slate-500">
+              Smart, secure & scalable multi-vendor eCommerce platform built
+              for performance and growth.
+            </p>
+          </div>
 
-        </div>
-
-        {/* Quick Links */}
+          {/* Quick Links */}
           <div>
-            <h3 className="text-white text-lg font-semibold mb-4">
+            <h3 className="text-white text-sm font-semibold uppercase tracking-wider mb-5">
               Quick Links
             </h3>
-            <ul className="space-y-2 text-sm">
-              <li
-                onClick={() => navigate("/")}
-                className="cursor-pointer hover:text-white"
-              >
-                Home
-              </li>
-              <li
-                onClick={() => navigate("/category")}
-                className="cursor-pointer hover:text-white"
-              >
-                Categories
-              </li>
-              <li
-                onClick={() => navigate("/shop")}
-                className="cursor-pointer hover:text-white"
-              >
-                Shop
-              </li>
-              <li
-                onClick={() => navigate("/contact")}
-                className="cursor-pointer hover:text-white"
-              >
-                Contact
-              </li>
+            <ul className="space-y-3 text-sm">
+              {[
+                { label: "Home", path: "/" },
+                { label: "Categories", path: "/category" },
+                { label: "Shop", path: "/shop" },
+                { label: "Contact", path: "/contact" },
+              ].map((link) => (
+                <li key={link.label}>
+                  <span
+                    onClick={() => navigate(link.path)}
+                    className="cursor-pointer hover:text-sky-400 transition-colors duration-300"
+                  >
+                    {link.label}
+                  </span>
+                </li>
+              ))}
             </ul>
           </div>
 
-        {/* Support */}
+          {/* Support */}
           <div>
-            <h3 className="text-white text-lg font-semibold mb-4">
+            <h3 className="text-white text-sm font-semibold uppercase tracking-wider mb-5">
               Help & Support
             </h3>
-            <ul className="space-y-2 text-sm">
-              <li
-                onClick={() => navigate("/support")}
-                className="cursor-pointer hover:text-white"
-              >
-                Support
-              </li>
-              <li
-                onClick={() => navigate("/orders")}
-                className="cursor-pointer hover:text-white"
-              >
-                Track Order
-              </li>
+            <ul className="space-y-3 text-sm">
+              {[
+                { label: "Support", path: "/support" },
+                { label: "Track Order", path: "/orders" },
+              ].map((link) => (
+                <li key={link.label}>
+                  <span
+                    onClick={() => navigate(link.path)}
+                    className="cursor-pointer hover:text-sky-400 transition-colors duration-300"
+                  >
+                    {link.label}
+                  </span>
+                </li>
+              ))}
             </ul>
           </div>
 
-
-        {/* Contact */}
-        <div className="space-y-2">
-          <h3 className="text-white text-lg font-semibold mb-4">
-            Contact Info
-          </h3>
-          <p className="text-sm">admin@RE_CON.com</p>
-          <p className="text-sm">+91 12345 67890</p>
-          <p className="text-sm">New Delhi, India</p>
+          {/* Contact */}
+          <div>
+            <h3 className="text-white text-sm font-semibold uppercase tracking-wider mb-5">
+              Contact Info
+            </h3>
+            <div className="space-y-3 text-sm">
+              <p className="hover:text-sky-400 transition-colors">admin@RE-CON.com</p>
+              <p className="hover:text-sky-400 transition-colors">+91 12345 67890</p>
+              <p className="hover:text-sky-400 transition-colors">New Delhi, India</p>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Bottom */}
-      <div className="text-center text-xs text-gray-500 mt-12 border-t border-gray-700 pt-4">
-        © {new Date().getFullYear()} RE-CON — Powered by Secure Commerce
-        Engine
+      {/* Bottom Bar */}
+      <div className="border-t border-white/5 py-5">
+        <p className="text-center text-xs text-slate-600">
+          © {new Date().getFullYear()} RE-CON — Powered by Secure Commerce Engine
+        </p>
       </div>
     </footer>
   );
