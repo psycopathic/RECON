@@ -44,7 +44,11 @@ const productSchema = new mongoose.Schema({
 			default: false,
 		},
 		priceComparisons: [priceComparisonSchema],
-},{timestamps: true});
+		createdBy: {
+			type: mongoose.Schema.Types.ObjectId,
+			ref: "User",
+		},
+	},{timestamps: true});
 
 const Product = mongoose.model("Product", productSchema);
 export default Product

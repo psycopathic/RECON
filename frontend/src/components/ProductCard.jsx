@@ -36,7 +36,15 @@ const ProductCard = ({ product }) => {
 					<h5 className="text-base font-semibold text-white mb-1 group-hover:text-sky-300 transition-colors truncate" title={product.name}>
 						{product.name}
 					</h5>
-					<p className="text-xs text-slate-500 mb-3 truncate">{product.category}</p>
+					<div className="flex items-center gap-2 mb-3">
+						<p className="text-xs text-slate-500 truncate">{product.category}</p>
+						{product.createdBy?.name && (
+							<>
+								<span className="text-xs text-slate-600">·</span>
+								<p className="text-xs text-sky-400/70 truncate">by {product.createdBy.name}</p>
+							</>
+						)}
+					</div>
 					<div className="mt-auto">
 						<p className="text-gradient text-xl font-bold mb-3">
 							₹{product.price.toLocaleString("en-IN")}

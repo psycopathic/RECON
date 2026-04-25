@@ -273,7 +273,11 @@ export const useVoiceControl = () => {
 
     recognition.onerror = (event) => {
       console.error("[Voice] Error:", event.error);
-      if (event.error === "not-allowed") {
+      if (event.error === "network") {
+        setError(
+          "Can't reach speech servers. Check your internet connection, or try Chrome (Brave blocks this by default)."
+        );
+      } else if (event.error === "not-allowed") {
         setError("Microphone permission denied. Please allow mic access.");
       } else if (event.error === "no-speech") {
         setError("No speech detected. Try again.");

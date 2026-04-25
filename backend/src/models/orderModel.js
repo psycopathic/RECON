@@ -35,6 +35,13 @@ const orderSchema = new mongoose.Schema(
 			type: String,
 			unique: true,
 		},
+		shippingAddress: {
+			street: { type: String },
+			city: { type: String },
+			state: { type: String },
+			zipCode: { type: String },
+			country: { type: String },
+		},
 	},
 	{ timestamps: true }
 );
