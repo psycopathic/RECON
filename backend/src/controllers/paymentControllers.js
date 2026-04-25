@@ -77,8 +77,8 @@ export const createCheckoutSession = async (req, res) => {
         products: JSON.stringify(
           products.map((p) => ({
             id: p._id,
-            quantity: p.quantity,
-            price: p.price,
+            quantity: p.quantity || 1,
+            price: p.price || 0,
           }))
         ),
         shippingAddress: JSON.stringify({
@@ -106,6 +106,13 @@ export const checkoutSession = async (req, res) => {
   try {
     const { sessionId } = req.body;
 
+    if (!sessionId) {
+      return res.status(400).json({
+        success: false,
+        message: "Session ID is required.",
+      });
+    }
+
     // ✅ Check if order with this session already exists
     const existingOrder = await Order.findOne({ stripeSessionId: sessionId });
     if (existingOrder) {
@@ -118,87 +125,114 @@ export const checkoutSession = async (req, res) => {
 
     const session = await stripe.checkout.sessions.retrieve(sessionId);
 
-    if (session.payment_status === "paid") {
-      // ✅ Deactivate coupon if used
-      if (session.metadata.couponCode) {
-        await Coupon.findOneAndUpdate(
-          {
-            code: session.metadata.couponCode,
-            userId: session.metadata.userId,
-          },
-          {
-            isActive: false,
-          }
-        );
-      }
-
-      // ✅ Parse products
-      const products = JSON.parse(session.metadata.products);
-      const shippingAddress = session.metadata.shippingAddress
-        ? JSON.parse(session.metadata.shippingAddress)
-        : null;
-
-      const newOrder = new Order({
-        user: session.metadata.userId,
-        products: products.map((product) => ({
-          product: product.id,
-          quantity: product.quantity,
-          price: product.price,
-        })),
-        totalAmount: session.amount_total / 100,
-        stripeSessionId: sessionId,
-        shippingAddress: shippingAddress,
-      });
-
-      await newOrder.save();
-
-      const buyer = await User.findById(session.metadata.userId);
-      const vendorNotificationsMap = new Map();
-
-      for (const item of products) {
-        const productDoc = await Product.findById(item.id);
-        if (productDoc && productDoc.createdBy) {
-          const vendorId = productDoc.createdBy.toString();
-          if (!vendorNotificationsMap.has(vendorId)) {
-            vendorNotificationsMap.set(vendorId, []);
-          }
-          vendorNotificationsMap.get(vendorId).push({
-            product: item.id,
-            productName: productDoc.name,
-            quantity: item.quantity,
-            price: item.price,
-          });
-        }
-      }
-
-      for (const [vendorId, items] of vendorNotificationsMap) {
-        for (const item of items) {
-          await Notification.create({
-            vendor: vendorId,
-            order: newOrder._id,
-            product: item.product,
-            buyerName: buyer ? buyer.name : "Unknown",
-            message: `${buyer ? buyer.name : "A customer"} ordered ${item.productName} (x${item.quantity}) for ₹${item.price * item.quantity}`,
-            isRead: false,
-          });
-        }
-      }
-
-      return res.status(200).json({
-        success: true,
-        message:
-          "Payment successful, order created, and coupon deactivated if used.",
-        orderId: newOrder._id,
-      });
-    } else {
+    if (session.payment_status !== "paid") {
       return res.status(400).json({
         success: false,
-        message: "Session is not marked as paid.",
+        message: "Payment has not been completed yet.",
       });
     }
+
+    // ✅ Deactivate coupon if used
+    if (session.metadata.couponCode) {
+      await Coupon.findOneAndUpdate(
+        {
+          code: session.metadata.couponCode,
+          userId: session.metadata.userId,
+        },
+        {
+          isActive: false,
+        }
+      );
+    }
+
+    // ✅ Parse products safely
+    let products = [];
+    try {
+      products = JSON.parse(session.metadata.products);
+    } catch (parseErr) {
+      console.error("Failed to parse products metadata:", session.metadata.products);
+      return res.status(500).json({
+        success: false,
+        message: "Failed to parse order data from payment session.",
+      });
+    }
+
+    let shippingAddress = null;
+    if (session.metadata.shippingAddress) {
+      try {
+        shippingAddress = JSON.parse(session.metadata.shippingAddress);
+      } catch (parseErr) {
+        console.error("Failed to parse shippingAddress metadata:", session.metadata.shippingAddress);
+      }
+    }
+
+    // ✅ Build order products with safe defaults
+    const orderProducts = products.map((product) => ({
+      product: product.id,
+      quantity: product.quantity || 1,
+      price: product.price || 0,
+    }));
+
+    const totalAmount = (session.amount_total || 0) / 100;
+
+    const newOrder = new Order({
+      user: session.metadata.userId,
+      products: orderProducts,
+      totalAmount,
+      stripeSessionId: sessionId,
+      shippingAddress: shippingAddress,
+    });
+
+    await newOrder.save();
+
+    // ✅ Create notifications for vendors
+    const buyer = await User.findById(session.metadata.userId);
+    const vendorNotificationsMap = new Map();
+
+    for (const item of products) {
+      const productDoc = await Product.findById(item.id);
+      if (productDoc && productDoc.createdBy) {
+        const vendorId = productDoc.createdBy.toString();
+        if (!vendorNotificationsMap.has(vendorId)) {
+          vendorNotificationsMap.set(vendorId, []);
+        }
+        vendorNotificationsMap.get(vendorId).push({
+          product: item.id,
+          productName: productDoc.name,
+          quantity: item.quantity || 1,
+          price: item.price || 0,
+        });
+      }
+    }
+
+    for (const [vendorId, items] of vendorNotificationsMap) {
+      for (const item of items) {
+        const addressLine = shippingAddress
+          ? `\nShip to: ${shippingAddress.street}, ${shippingAddress.city}, ${shippingAddress.state} ${shippingAddress.zipCode}, ${shippingAddress.country}`
+          : "";
+        await Notification.create({
+          vendor: vendorId,
+          order: newOrder._id,
+          product: item.product,
+          buyerName: buyer ? buyer.name : "Unknown",
+          message: `${buyer ? buyer.name : "A customer"} ordered ${item.productName} (x${item.quantity}) for ₹${item.price * item.quantity}${addressLine}`,
+          shippingAddress: shippingAddress || undefined,
+          isRead: false,
+        });
+      }
+    }
+
+    return res.status(200).json({
+      success: true,
+      message:
+        "Payment successful, order created, and coupon deactivated if used.",
+      orderId: newOrder._id,
+    });
   } catch (error) {
-    console.error("Error processing successful checkout:", error);
+    console.error("Error processing successful checkout:", error.message);
+    console.error("Stack:", error.stack);
     res.status(500).json({
+      success: false,
       message: "Error processing successful checkout",
       error: error.message,
     });

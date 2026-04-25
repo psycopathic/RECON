@@ -102,6 +102,14 @@ const NotificationBell = () => {
 									}`}
 								>
 									<p className="text-xs text-white leading-relaxed">{n.message}</p>
+									{n.shippingAddress && (
+										<p className="text-[10px] text-sky-400/80 mt-1 flex items-start gap-1">
+											<span className="shrink-0">📍</span>
+											<span>
+												{n.shippingAddress.street}, {n.shippingAddress.city}, {n.shippingAddress.state} {n.shippingAddress.zipCode}, {n.shippingAddress.country}
+											</span>
+										</p>
+									)}
 									<p className="text-[10px] text-slate-500 mt-1">
 										{new Date(n.createdAt).toLocaleDateString("en-IN", {
 											day: "numeric",

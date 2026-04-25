@@ -1,5 +1,5 @@
 import React from 'react'
-import { ArrowRight, CheckCircle, HandHeart } from "lucide-react";
+import { ArrowRight, CheckCircle, HandHeart, AlertTriangle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useCartStore } from "../store/useCartStore";
@@ -10,14 +10,24 @@ const PurchaseSuccessPage = () => {
 	const [isProcessing, setIsProcessing] = useState(true);
 	const { clearCart } = useCartStore();
 	const [error, setError] = useState(null);
+	const [orderId, setOrderId] = useState(null);
 
 	useEffect(() => {
 		const handleCheckoutSuccess = async (sessionId) => {
 			try {
-				await axios.post("/payment/checkoutSuccess", { sessionId });
-				clearCart();
+				const res = await axios.post("/payment/checkoutSuccess", { sessionId });
+				if (res.data.success) {
+					setOrderId(res.data.orderId);
+					clearCart();
+				} else {
+					setError(res.data.message || "Payment was not successful.");
+				}
 			} catch (error) {
-				console.log(error);
+				console.error("Checkout error:", error);
+				setError(
+					error.response?.data?.message ||
+					"Something went wrong while confirming your order. Please contact support."
+				);
 			} finally {
 				setIsProcessing(false);
 			}
@@ -34,13 +44,31 @@ const PurchaseSuccessPage = () => {
 
 	if (isProcessing) return (
 		<div className="min-h-screen flex items-center justify-center">
-			<div className="w-10 h-10 border-3 border-slate-700 border-t-sky-500 rounded-full animate-spin" />
+			<div className="text-center">
+				<div className="w-10 h-10 border-3 border-slate-700 border-t-sky-500 rounded-full animate-spin mx-auto mb-4" />
+				<p className="text-slate-400 text-sm">Confirming your payment...</p>
+			</div>
 		</div>
 	);
 
 	if (error) return (
-		<div className="min-h-screen flex items-center justify-center">
-			<p className="text-red-400">{error}</p>
+		<div className="min-h-screen flex items-center justify-center px-4">
+			<div className="max-w-md w-full glass-card rounded-2xl overflow-hidden p-8 text-center">
+				<div className="flex justify-center mb-4">
+					<div className="p-4 rounded-full bg-amber-500/10 border border-amber-500/20">
+						<AlertTriangle className="text-amber-400 w-12 h-12" />
+					</div>
+				</div>
+				<h1 className="text-2xl font-black text-amber-400 mb-2">Something Went Wrong</h1>
+				<p className="text-slate-400 text-sm mb-6">{error}</p>
+				<Link
+					to="/"
+					className="w-full bg-slate-800/50 border border-white/10 hover:border-sky-500/20 text-sky-400 font-medium py-2.5 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 text-sm"
+				>
+					Return to Shop
+					<ArrowRight size={16} />
+				</Link>
+			</div>
 		</div>
 	);
 
@@ -75,7 +103,9 @@ const PurchaseSuccessPage = () => {
 					<div className="bg-slate-800/50 rounded-xl p-4 mb-6 border border-white/5">
 						<div className="flex items-center justify-between mb-2">
 							<span className="text-xs text-slate-500">Order number</span>
-							<span className="text-xs font-semibold text-sky-400">#12345</span>
+							<span className="text-xs font-semibold text-sky-400 font-mono">
+								{orderId ? `#${orderId.slice(-8).toUpperCase()}` : "—"}
+							</span>
 						</div>
 						<div className="flex items-center justify-between">
 							<span className="text-xs text-slate-500">Estimated delivery</span>
