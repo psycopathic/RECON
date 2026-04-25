@@ -5,6 +5,8 @@ import Notification from "../models/notificationModel.js";
 import User from "../models/userModel.js";
 import { stripe } from "../lib/stripe.js";
 
+const CLIENT_URL = process.env.CLIENT_URL || "https://recon-2-bjrm.onrender.com";
+
 export const createCheckoutSession = async (req, res) => {
   try {
     const { products, couponCode, addressId } = req.body;
@@ -68,8 +70,8 @@ export const createCheckoutSession = async (req, res) => {
       payment_method_types: ["card"],
       line_items: lineItems,
       mode: "payment",
-      success_url: `${process.env.CLIENT_URL}/purchase-success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.CLIENT_URL}/purchase-cancel`,
+      success_url: `${CLIENT_URL}/purchase-success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${CLIENT_URL}/purchase-cancel`,
       discounts,
       metadata: {
         userId: req.user._id.toString(),
