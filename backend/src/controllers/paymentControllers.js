@@ -12,15 +12,16 @@ export const createCheckoutSession = async (req, res) => {
 
     const lineItems = products.map((product) => {
       const amount = Math.round(product.price * 100);
-      totalAmount += amount * product.quantity;
+      totalAmount += amount * (product.quantity || 1);
+
+      const productData = {
+        name: (product.name || "Product").substring(0, 250),
+      };
 
       return {
         price_data: {
-          currency: "usd",
-          product_data: {
-            name: product.name,
-            images: [product.image],
-          },
+          currency: "inr",
+          product_data: productData,
           unit_amount: amount,
         },
         quantity: product.quantity || 1,
@@ -40,19 +41,23 @@ export const createCheckoutSession = async (req, res) => {
       }
     }
     //session creation
+    let discounts = [];
+    if (coupon) {
+      try {
+        const stripeCouponId = await createStripeCoupon(coupon.discountPercentage);
+        discounts = [{ coupon: stripeCouponId }];
+      } catch (couponErr) {
+        console.error("Failed to create Stripe coupon, proceeding without:", couponErr.message);
+      }
+    }
+
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       line_items: lineItems,
       mode: "payment",
       success_url: `${process.env.CLIENT_URL}/purchase-success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.CLIENT_URL}/purchase-cancel`,
-      discounts: coupon
-        ? [
-            {
-              coupon: await createStripeCoupon(coupon.discountPercentage),
-            },
-          ]
-        : [],
+      discounts,
       metadata: {
         userId: req.user._id.toString(),
         couponCode: couponCode || "",

@@ -21,8 +21,8 @@ const ProductCard = ({ product }) => {
 	};
 
 	return (
-		<Link to={`/product/${product._id}`} className="block h-full">
-			<div className="glass-card rounded-2xl overflow-hidden group transition-all duration-300 hover:border-sky-500/30 hover:shadow-lg hover:shadow-sky-500/10 w-full h-full flex flex-col">
+		<Link to={`/product/${product._id}`} className="block w-full">
+			<div className="glass-card rounded-2xl overflow-hidden group transition-all duration-300 hover:border-sky-500/30 hover:shadow-lg hover:shadow-sky-500/10 flex flex-col">
 				<div className="relative overflow-hidden flex-shrink-0">
 					<img
 						className="w-full h-56 object-cover transition-transform duration-500 ease-out group-hover:scale-110"

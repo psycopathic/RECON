@@ -53,28 +53,31 @@ const FeaturedProducts = ({ featuredProducts }) => {
                   className="w-full sm:w-1/2 lg:w-1/3 xl:w-1/4 flex-shrink-0 px-2"
                 >
                   <Link to={`/product/${product._id}`} className="block">
-                  <div className="glass-card rounded-2xl overflow-hidden h-full transition-all duration-300 hover:border-sky-500/30 hover:shadow-lg hover:shadow-sky-500/10 group">
-                    <div className="overflow-hidden">
+                  <div className="glass-card rounded-2xl overflow-hidden h-full transition-all duration-300 hover:border-sky-500/30 hover:shadow-lg hover:shadow-sky-500/10 group flex flex-col">
+                    <div className="overflow-hidden flex-shrink-0">
                       <img
                         src={product.image}
                         alt={product.name}
-                        className="w-full h-52 object-cover transition-transform duration-500 ease-out group-hover:scale-110"
+                        className="w-full h-56 object-cover transition-transform duration-500 ease-out group-hover:scale-110"
                       />
                     </div>
-                    <div className="p-5">
-                      <h3 className="text-base font-semibold mb-2 text-white group-hover:text-sky-300 transition-colors">
+                    <div className="p-5 flex flex-col flex-1">
+                      <h3 className="text-base font-semibold mb-1 text-white group-hover:text-sky-300 transition-colors truncate">
                         {product.name}
                       </h3>
-                      <p className="text-gradient font-bold text-lg mb-4">
-                        ₹{product.price.toFixed(2)}
-                      </p>
-                      <button
-                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); addToCart(product); }}
-                        className="w-full bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white font-medium py-2.5 px-4 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 text-sm shadow-lg shadow-sky-500/20 hover:shadow-sky-500/30"
-                      >
-                        <ShoppingCart className="w-4 h-4" />
-                        Add to Cart
-                      </button>
+                      <p className="text-xs text-slate-500 mb-3 truncate">{product.category}</p>
+                      <div className="mt-auto">
+                        <p className="text-gradient font-bold text-xl mb-3">
+                          ₹{product.price.toLocaleString("en-IN")}
+                        </p>
+                        <button
+                          onClick={(e) => { e.preventDefault(); e.stopPropagation(); addToCart(product); }}
+                          className="w-full bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white font-medium py-2.5 px-4 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 text-sm shadow-lg shadow-sky-500/20 hover:shadow-sky-500/30"
+                        >
+                          <ShoppingCart className="w-4 h-4" />
+                          Add to Cart
+                        </button>
+                      </div>
                     </div>
                   </div>
                   </Link>

@@ -42,8 +42,14 @@ export const useUserStore = create((set, get) => ({
 			const response = await axios.get("/auth/profile");
 			set({ user: response.data, checkingAuth: false });
 		} catch (error) {
-			console.log(error.message);
-			set({ checkingAuth: false, user: null });
+			console.log("profile check failed, attempting refresh:", error.message);
+			try {
+				const refreshResponse = await axios.post("/auth/refreshToken");
+				set({ user: refreshResponse.data, checkingAuth: false });
+			} catch (refreshError) {
+				console.log("refresh also failed:", refreshError.message);
+				set({ checkingAuth: false, user: null });
+			}
 		}
 	},
 
@@ -57,9 +63,6 @@ export const useUserStore = create((set, get) => ({
   },
 
   refreshToken: async () => {
-		// Prevent multiple simultaneous refresh attempts
-		if (get().checkingAuth) return;
-
 		set({ checkingAuth: true });
 		try {
 			const response = await axios.post("/auth/refreshToken");
