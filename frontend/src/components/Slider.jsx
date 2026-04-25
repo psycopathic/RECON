@@ -13,6 +13,7 @@ const slides = [
     subtitle: "DO IT NOW.",
     description: "Running Shoes",
     button: "DISCOVER",
+    category: "shoes",
   },
   {
     image: slide2,
@@ -20,6 +21,7 @@ const slides = [
     subtitle: "NEW COLLECTION",
     description: "Women's Fashion Accessories",
     button: "DISCOVER",
+    category: "accessories",
   },
   {
     image: slide3,
@@ -27,6 +29,7 @@ const slides = [
     subtitle: "FEEL THE SPEED",
     description: "Smart Gadgets for Smart People",
     button: "DISCOVER",
+    category: "gadgets",
   },
 ];
 
@@ -98,7 +101,7 @@ export default function Slider() {
               whileHover={{ scale: 1.05, boxShadow: "0 0 30px rgba(56, 189, 248, 0.4)" }}
               whileTap={{ scale: 0.95 }}
               className="px-8 py-3.5 bg-gradient-to-r from-sky-500 to-indigo-500 text-white font-semibold rounded-full shadow-xl shadow-sky-500/25 transition-all duration-300 text-sm md:text-base tracking-wide"
-              onClick={() => navigate("/category")}
+              onClick={() => navigate(`/category/${slides[current].category}`)}
             >
               {slides[current].button} →
             </motion.button>
