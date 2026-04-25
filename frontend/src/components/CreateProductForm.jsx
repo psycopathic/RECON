@@ -1,8 +1,15 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { PlusCircle, Upload, Loader } from "lucide-react";
+import { PlusCircle, Upload, Loader, Plus, X } from "lucide-react";
 import { useProductStore } from "../store/useProductStore";
 import { categorySlugs } from "../constants/categories";
+
+const PLATFORMS = [
+  { value: "amazon", label: "Amazon" },
+  { value: "flipkart", label: "Flipkart" },
+  { value: "snapdeal", label: "Snapdeal" },
+  { value: "meesho", label: "Meesho" },
+];
 
 const CreateProductForm = () => {
   const [newProduct, setNewProduct] = useState({
@@ -12,13 +19,16 @@ const CreateProductForm = () => {
     category: "",
     image: "",
   });
+  const [priceComparisons, setPriceComparisons] = useState([]);
+
   const { createProduct, loading } = useProductStore();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await createProduct(newProduct);
+      await createProduct({ ...newProduct, priceComparisons });
       setNewProduct({ name: "", description: "", price: "", category: "", image: "" });
+      setPriceComparisons([]);
     } catch {
       console.log("error creating a product");
     }
@@ -33,6 +43,20 @@ const CreateProductForm = () => {
       };
       reader.readAsDataURL(file);
     }
+  };
+
+  const addComparisonEntry = () => {
+    setPriceComparisons([...priceComparisons, { platform: "", price: "", url: "" }]);
+  };
+
+  const removeComparisonEntry = (index) => {
+    setPriceComparisons(priceComparisons.filter((_, i) => i !== index));
+  };
+
+  const updateComparisonEntry = (index, field, value) => {
+    const updated = [...priceComparisons];
+    updated[index] = { ...updated[index], [field]: value };
+    setPriceComparisons(updated);
   };
 
   return (
@@ -126,6 +150,67 @@ const CreateProductForm = () => {
           {newProduct.image && (
             <span className="text-xs text-emerald-400">✓ Image uploaded</span>
           )}
+        </div>
+
+        <div className="pt-4 border-t border-white/5">
+          <div className="flex items-center justify-between mb-3">
+            <label className="block text-sm font-medium text-slate-300">
+              Price Comparison Links
+            </label>
+            <button
+              type="button"
+              onClick={addComparisonEntry}
+              className="inline-flex items-center gap-1 text-xs text-sky-400 hover:text-sky-300 transition-colors"
+            >
+              <Plus size={14} />
+              Add Platform
+            </button>
+          </div>
+
+          {priceComparisons.length === 0 && (
+            <p className="text-xs text-slate-500">No comparison links added. Click "Add Platform" to add one.</p>
+          )}
+
+          <div className="space-y-3">
+            {priceComparisons.map((entry, index) => (
+              <div key={index} className="flex items-start gap-2">
+                <select
+                  value={entry.platform}
+                  onChange={(e) => updateComparisonEntry(index, "platform", e.target.value)}
+                  className="py-2 px-3 bg-slate-800/60 border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-sky-500/50 transition-all w-32 flex-shrink-0"
+                >
+                  <option value="">Platform</option>
+                  {PLATFORMS.map((p) => (
+                    <option key={p.value} value={p.value}>{p.label}</option>
+                  ))}
+                </select>
+
+                <input
+                  type="number"
+                  placeholder="Price"
+                  value={entry.price}
+                  onChange={(e) => updateComparisonEntry(index, "price", e.target.value)}
+                  className="py-2 px-3 bg-slate-800/60 border border-white/10 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-sky-500/50 transition-all w-24 flex-shrink-0"
+                />
+
+                <input
+                  type="url"
+                  placeholder="Product URL"
+                  value={entry.url}
+                  onChange={(e) => updateComparisonEntry(index, "url", e.target.value)}
+                  className="py-2 px-3 bg-slate-800/60 border border-white/10 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-sky-500/50 transition-all flex-1 min-w-0"
+                />
+
+                <button
+                  type="button"
+                  onClick={() => removeComparisonEntry(index)}
+                  className="p-2 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg transition-all flex-shrink-0"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+            ))}
+          </div>
         </div>
 
         <button

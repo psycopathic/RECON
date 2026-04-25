@@ -21,7 +21,7 @@ const Homepage = () => {
         <h1 className="text-center text-5xl sm:text-6xl font-bold text-sky-600 mb-4">
           Explore Our Categories
         </h1>
-        <p className="text-center text-xl text-black mb-12">
+        <p className="text-center text-xl text-white mb-12">
           Discover the latest trends in eco-friendly fashion
         </p>
 

@@ -28,7 +28,8 @@ export const signup = async (req, res) => {
 
     // 3. Create new user
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = new User({ email, password: hashedPassword, name });
+    const userRole = role === "vendor" ? "admin" : "customer";
+    const user = new User({ email, password: hashedPassword, name, role: userRole });
     await user.save();
 
     // 4. Generate auth tokens

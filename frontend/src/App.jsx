@@ -10,6 +10,7 @@ import CartPage from "./pages/CartPage";
 import PurchaseSuccessPage from "./pages/PurchaseSuccessPage";
 import PurchaseCancelPage from "./pages/PurchaseCancelPage";
 import SearchResultsPage from "./pages/SearchResultsPage";
+import ProductDetailPage from "./pages/ProductDetailPage";
 
 import Navbar from "./components/Navbar";
 import VoiceControl from "./components/VoiceControl";
@@ -44,6 +45,7 @@ function App() {
             <Route path="/login" element={!user ? (<Loginpage />) : (<Navigate to="/" />)} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/search" element={<SearchResultsPage />} />
+            <Route path="/product/:id" element={<ProductDetailPage />} />
 
             <Route path="/secretDashboard" element={user && user.role === "admin" ? <Adminpage /> : <Navigate to="/login" />} />
             <Route path='/category/:category' element={<CategoryPage />} />

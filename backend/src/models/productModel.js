@@ -1,5 +1,22 @@
 import mongoose from "mongoose";
 
+const priceComparisonSchema = new mongoose.Schema({
+    platform: {
+        type: String,
+        enum: ["amazon", "flipkart", "snapdeal", "meesho"],
+        required: true,
+    },
+    price: {
+        type: Number,
+        min: 0,
+        required: true,
+    },
+    url: {
+        type: String,
+        required: true,
+    },
+}, { _id: false });
+
 const productSchema = new mongoose.Schema({
     name: {
 			type: String,
@@ -26,6 +43,7 @@ const productSchema = new mongoose.Schema({
 			type: Boolean,
 			default: false,
 		},
+		priceComparisons: [priceComparisonSchema],
 },{timestamps: true});
 
 const Product = mongoose.model("Product", productSchema);

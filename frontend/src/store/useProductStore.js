@@ -4,7 +4,9 @@ import toast from "react-hot-toast";
 
 export const useProductStore = create((set, get) => ({
   products: [],
+  singleProduct: null,
   loading: false,
+  singleLoading: false,
 
   setProduct: (products) => set({ products }),
 
@@ -95,6 +97,32 @@ export const useProductStore = create((set, get) => ({
     } catch (error) {
       set({ error: "Failed to fetch products", loading: false });
       console.log("Error fetching featured products:", error);
+    }
+  },
+
+  fetchSingleProduct: async (id) => {
+    set({ singleLoading: true });
+    try {
+      const response = await axios.get(`/products/${id}`);
+      set({ singleProduct: response.data, singleLoading: false });
+    } catch (error) {
+      set({ error: "Failed to fetch product", singleLoading: false });
+      toast.error(error.response?.data?.message || "Failed to fetch product");
+    }
+  },
+
+  updatePriceComparisons: async (productId, priceComparisons) => {
+    try {
+      const response = await axios.put(`/products/${productId}/price-comparison`, { priceComparisons });
+      set((prevState) => ({
+        products: prevState.products.map((p) =>
+          p._id === productId ? response.data : p
+        ),
+        singleProduct: prevState.singleProduct?._id === productId ? response.data : prevState.singleProduct,
+      }));
+      toast.success("Price comparisons updated");
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to update price comparisons");
     }
   },
 }));

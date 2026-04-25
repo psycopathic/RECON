@@ -1,6 +1,7 @@
 import Product from "../models/productModel.js";
 import { redisWrapper as redis } from "../lib/redis.js";
 import cloudinary from "../lib/cloudinary.js";
+import { scrapeAllPlatforms } from "../services/priceScraper.js";
 export const getAllProducts = async (req, res) => {
   try {
     const products = await Product.find({});
@@ -33,7 +34,7 @@ export const getFeaturedProducts = async (req, res) => {
 
 export const createProducts = async (req, res) => {
   try {
-    const { name, description, price, image, category } = req.body;
+    const { name, description, price, image, category, priceComparisons } = req.body;
     if (!name || !description || !price || !image || !category) {
       return res.status(400).json({ message: "Please fill all the fields" });
     }
@@ -52,6 +53,7 @@ export const createProducts = async (req, res) => {
         ? cloudinaryResponse.secure_url
         : "",
       category,
+      priceComparisons: priceComparisons || [],
     });
 
     await product.save();
@@ -161,3 +163,71 @@ async function updateFeatureProductCache() {
     console.log("error in update cache function");
   }
 }
+
+export const getSingleProduct = async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.id);
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+    res.json(product);
+  } catch (error) {
+    console.log("Error in getSingleProduct controller", error.message);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+export const updatePriceComparison = async (req, res) => {
+  try {
+    const { priceComparisons } = req.body;
+    if (!Array.isArray(priceComparisons)) {
+      return res.status(400).json({ message: "priceComparisons must be an array" });
+    }
+
+    for (const entry of priceComparisons) {
+      if (!entry.platform || !entry.price || !entry.url) {
+        return res.status(400).json({ message: "Each entry must have platform, price, and url" });
+      }
+    }
+
+    const product = await Product.findByIdAndUpdate(
+      req.params.id,
+      { priceComparisons },
+      { new: true }
+    );
+
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    res.json(product);
+  } catch (error) {
+    console.log("Error in updatePriceComparison controller", error.message);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+export const comparePrices = async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.id);
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    const cacheKey = `priceCompare:${product.name}`;
+    const cached = await redis.get(cacheKey).catch(() => null);
+    if (cached) {
+      const parsed = JSON.parse(cached);
+      return res.json({ ...parsed, ourPrice: product.price, productName: product.name });
+    }
+
+    const data = await scrapeAllPlatforms(product.name);
+
+    await redis.set(cacheKey, JSON.stringify(data), "EX", 21600).catch(() => {});
+
+    res.json({ ...data, ourPrice: product.price, productName: product.name });
+  } catch (error) {
+    console.log("Error in comparePrices controller", error.message);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
