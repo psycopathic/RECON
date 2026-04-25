@@ -230,6 +230,23 @@ export const checkoutSession = async (req, res) => {
     });
   } catch (error) {
     console.error("Error processing successful checkout:", error.message);
+
+    // ✅ Handle race condition: if duplicate key error, the order was likely created by a parallel request
+    if (error.code === 11000 && error.keyPattern?.stripeSessionId) {
+      try {
+        const existingOrder = await Order.findOne({ stripeSessionId: req.body.sessionId });
+        if (existingOrder) {
+          return res.status(200).json({
+            success: true,
+            message: "Order already exists (recovered from race condition).",
+            orderId: existingOrder._id,
+          });
+        }
+      } catch (findErr) {
+        // fall through to general error
+      }
+    }
+
     console.error("Stack:", error.stack);
     res.status(500).json({
       success: false,
