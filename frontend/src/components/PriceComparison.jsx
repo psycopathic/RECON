@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { ExternalLink, Search, TrendingDown, TrendingUp, Minus, Loader2 } from "lucide-react";
+import { ExternalLink, TrendingDown, TrendingUp, Minus, Loader2 } from "lucide-react";
 import axios from "../lib/axios.js";
 
 const platformMeta = {
@@ -280,17 +280,10 @@ const PriceComparison = ({ productId, ourPrice, productName }) => {
                 rel="noopener noreferrer"
                 className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 bg-gradient-to-r ${meta.color} text-white hover:opacity-90 hover:shadow-lg flex-shrink-0`}
               >
-                {topResult ? (
-                  <>
-                    Visit
-                    <ExternalLink size={14} />
-                  </>
-                ) : (
-                  <>
-                    Search
-                    <Search size={14} />
-                  </>
-                )}
+                <>
+                  Visit
+                  <ExternalLink size={14} />
+                </>
               </a>
             </div>
           );
