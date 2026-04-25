@@ -1,13 +1,26 @@
 import Coupon from "../models/couponModel.js";
 import Order from "../models/orderModel.js";
+import Product from "../models/productModel.js";
+import Notification from "../models/notificationModel.js";
+import User from "../models/userModel.js";
 import { stripe } from "../lib/stripe.js";
 
 export const createCheckoutSession = async (req, res) => {
   try {
-    const { products, couponCode } = req.body;
+    const { products, couponCode, addressId } = req.body;
     if (!Array.isArray(products) || products.length === 0) {
       return res.status(400).json({ error: "Invalid or empty products array" });
     }
+    if (!addressId) {
+      return res.status(400).json({ error: "Please select a shipping address" });
+    }
+
+    const user = await User.findById(req.user._id);
+    const selectedAddress = user.addresses.id(addressId);
+    if (!selectedAddress) {
+      return res.status(404).json({ error: "Address not found" });
+    }
+
     let totalAmount = 0;
 
     const lineItems = products.map((product) => {
@@ -68,6 +81,13 @@ export const createCheckoutSession = async (req, res) => {
             price: p.price,
           }))
         ),
+        shippingAddress: JSON.stringify({
+          street: selectedAddress.street,
+          city: selectedAddress.city,
+          state: selectedAddress.state,
+          zipCode: selectedAddress.zipCode,
+          country: selectedAddress.country,
+        }),
       },
     });
     if (totalAmount >= 20000) {
@@ -114,8 +134,10 @@ export const checkoutSession = async (req, res) => {
 
       // ✅ Parse products
       const products = JSON.parse(session.metadata.products);
+      const shippingAddress = session.metadata.shippingAddress
+        ? JSON.parse(session.metadata.shippingAddress)
+        : null;
 
-      // ✅ Create and save new order
       const newOrder = new Order({
         user: session.metadata.userId,
         products: products.map((product) => ({
@@ -125,9 +147,42 @@ export const checkoutSession = async (req, res) => {
         })),
         totalAmount: session.amount_total / 100,
         stripeSessionId: sessionId,
+        shippingAddress: shippingAddress,
       });
 
       await newOrder.save();
+
+      const buyer = await User.findById(session.metadata.userId);
+      const vendorNotificationsMap = new Map();
+
+      for (const item of products) {
+        const productDoc = await Product.findById(item.id);
+        if (productDoc && productDoc.createdBy) {
+          const vendorId = productDoc.createdBy.toString();
+          if (!vendorNotificationsMap.has(vendorId)) {
+            vendorNotificationsMap.set(vendorId, []);
+          }
+          vendorNotificationsMap.get(vendorId).push({
+            product: item.id,
+            productName: productDoc.name,
+            quantity: item.quantity,
+            price: item.price,
+          });
+        }
+      }
+
+      for (const [vendorId, items] of vendorNotificationsMap) {
+        for (const item of items) {
+          await Notification.create({
+            vendor: vendorId,
+            order: newOrder._id,
+            product: item.product,
+            buyerName: buyer ? buyer.name : "Unknown",
+            message: `${buyer ? buyer.name : "A customer"} ordered ${item.productName} (x${item.quantity}) for ₹${item.price * item.quantity}`,
+            isRead: false,
+          });
+        }
+      }
 
       return res.status(200).json({
         success: true,

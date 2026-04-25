@@ -4,7 +4,7 @@ import cloudinary from "../lib/cloudinary.js";
 import { scrapeAllPlatforms } from "../services/priceScraper.js";
 export const getAllProducts = async (req, res) => {
   try {
-    const products = await Product.find({});
+    const products = await Product.find({}).populate("createdBy", "name");
     res.json(products);
   } catch (error) {
     console.log("Error in getAllProducts controller", error.message);
@@ -18,8 +18,8 @@ export const getFeaturedProducts = async (req, res) => {
     if (featuredProducts) {
       return res.json(JSON.parse(featuredProducts));
     }
-    //.lean() is used to convert the mongoose object to a plain javascript object
-    featuredProducts = await Product.find({ isFeatured: true }).lean();
+    //.populate() then .lean() to return plain objects with populated fields
+    featuredProducts = await Product.find({ isFeatured: true }).populate("createdBy", "name").lean();
     if (!featuredProducts || featuredProducts.length === 0) {
       return res.status(404).json({ message: "No featured products found" });
     }
@@ -54,6 +54,7 @@ export const createProducts = async (req, res) => {
         : "",
       category,
       priceComparisons: priceComparisons || [],
+      createdBy: req.user._id,
     });
 
     await product.save();
@@ -119,7 +120,7 @@ export const searchProducts = async (req, res) => {
     const regex = new RegExp(q.trim(), "i");
     const products = await Product.find({
       $or: [{ name: regex }, { description: regex }],
-    });
+    }).populate("createdBy", "name");
     res.json(products);
   } catch (error) {
     console.log("Error in searchProducts controller", error.message);
@@ -130,7 +131,7 @@ export const searchProducts = async (req, res) => {
 export const getProductByCategory = async (req, res) => {
   const { category } = req.params;
   try {
-    const products = await Product.find({ category });
+    const products = await Product.find({ category }).populate("createdBy", "name");
     res.json({ products });
   } catch (error) {
     console.log("Error in getProductsByCategory controller", error.message);
@@ -157,16 +158,37 @@ export const toggleFeaturedProduct = async (req, res) => {
 
 async function updateFeatureProductCache() {
   try {
-    const featuredProducts = await Product.find({ isFeatured: true }).lean();
+    const featuredProducts = await Product.find({ isFeatured: true }).populate("createdBy", "name").lean();
     await redis.set("featuredProduct", JSON.stringify(featuredProducts));
   } catch (error) {
     console.log("error in update cache function");
   }
 }
 
+export const getMyProducts = async (req, res) => {
+  try {
+    const products = await Product.find({ createdBy: req.user._id }).populate("createdBy", "name");
+    res.json(products);
+  } catch (error) {
+    console.log("Error in getMyProducts controller", error.message);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+export const getProductsByVendor = async (req, res) => {
+  try {
+    const { vendorId } = req.params;
+    const products = await Product.find({ createdBy: vendorId }).populate("createdBy", "name");
+    res.json(products);
+  } catch (error) {
+    console.log("Error in getProductsByVendor controller", error.message);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
 export const getSingleProduct = async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id);
+    const product = await Product.findById(req.params.id).populate("createdBy", "name");
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }

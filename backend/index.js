@@ -8,6 +8,8 @@ import cartRouter from './src/routes/cartRoutes.js';
 import couponRouter from './src/routes/couponRoutes.js';
 import paymentRouter from './src/routes/paymentRoutes.js';
 import analyticsRouter from './src/routes/analyticsRoutes.js';
+import addressRouter from './src/routes/addressRoutes.js';
+import notificationRouter from './src/routes/notificationRoutes.js';
 import cors from 'cors';
 import { connectDB } from './src/lib/db.js';
 import cookieParser from 'cookie-parser';
@@ -46,6 +48,8 @@ app.use('/api/cart', cartRouter);
 app.use('/api/coupon', couponRouter);
 app.use('/api/payment', paymentRouter);
 app.use('/api/analytics', analyticsRouter);
+app.use('/api/address', addressRouter);
+app.use('/api/notifications', notificationRouter);
 
 if(process.env.NODE_ENV === "production") {
     const distPath = path.join(__dirname, '../frontend/dist');

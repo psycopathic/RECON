@@ -97,6 +97,12 @@ const ProductDetailPage = () => {
               {singleProduct.description}
             </p>
 
+            {singleProduct.createdBy?.name && (
+              <p className="text-xs text-sky-400/70 mb-4">
+                Sold by: <span className="font-medium text-sky-400">{singleProduct.createdBy.name}</span>
+              </p>
+            )}
+
             <div className="flex items-baseline gap-3 mb-8">
               <span className="text-4xl font-black text-gradient">
                 ₹{singleProduct.price.toLocaleString("en-IN")}

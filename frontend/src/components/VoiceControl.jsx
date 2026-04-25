@@ -1,21 +1,22 @@
 import React from "react";
-import { Mic, MicOff, Loader2, X, Volume2 } from "lucide-react";
+import { Mic, MicOff, Volume2 } from "lucide-react";
 import { useVoiceControl } from "../hooks/useVoiceControl";
 
 const VoiceControl = () => {
     const {
         isListening,
-        isModelLoading,
+        isSupported,
         transcript,
         partialTranscript,
         error,
+        lastAction,
         toggleListening,
     } = useVoiceControl();
 
     return (
         <>
             {/* ── Transcript overlay ─────────────────────────────────── */}
-            {(isListening || transcript || error) && (
+            {(isListening || transcript || lastAction || error) && (
                 <div
                     id="voice-transcript-overlay"
                     className="fixed bottom-24 right-6 z-50 max-w-xs w-full"
@@ -50,6 +51,13 @@ const VoiceControl = () => {
                             </p>
                         )}
 
+                        {/* Last action feedback */}
+                        {lastAction && (
+                            <p className="text-xs font-medium text-emerald-600">
+                                ✓ {lastAction}
+                            </p>
+                        )}
+
                         {/* Error */}
                         {error && <p className="text-xs text-red-500">{error}</p>}
 
@@ -71,23 +79,23 @@ const VoiceControl = () => {
             <button
                 id="voice-control-btn"
                 onClick={toggleListening}
-                disabled={isModelLoading}
+                disabled={!isSupported}
                 className={`
           fixed bottom-6 right-6 z-50
           w-14 h-14 rounded-full
           flex items-center justify-center
           shadow-lg cursor-pointer
           transition-all duration-300 ease-in-out
-          ${isModelLoading
-                        ? "bg-gray-300 cursor-wait"
+          ${!isSupported
+                        ? "bg-gray-300 cursor-not-allowed"
                         : isListening
                             ? "bg-red-500 hover:bg-red-600 shadow-red-300/50 shadow-xl"
                             : "bg-sky-500 hover:bg-sky-600 shadow-sky-300/50 hover:shadow-xl"
                     }
         `}
                 title={
-                    isModelLoading
-                        ? "Loading model…"
+                    !isSupported
+                        ? "Voice not supported in this browser"
                         : isListening
                             ? "Stop listening"
                             : "Start voice control"
@@ -101,9 +109,7 @@ const VoiceControl = () => {
                     </>
                 )}
 
-                {isModelLoading ? (
-                    <Loader2 size={24} className="text-white animate-spin" />
-                ) : isListening ? (
+                {isListening ? (
                     <MicOff size={24} className="text-white relative z-10" />
                 ) : (
                     <Mic size={24} className="text-white" />

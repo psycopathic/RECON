@@ -137,11 +137,11 @@ const PriceComparisonEditor = ({ product }) => {
 };
 
 const ProductList = () => {
-  const { deleteProduct, toggleFeaturedProduct, products, fetchAllProducts } = useProductStore();
+  const { deleteProduct, toggleFeaturedProduct, products, fetchMyProducts } = useProductStore();
 
   useEffect(() => {
-    fetchAllProducts();
-  }, [fetchAllProducts]);
+    fetchMyProducts();
+  }, [fetchMyProducts]);
 
   return (
     <motion.div

@@ -11,6 +11,8 @@ import {
   getSingleProduct,
   updatePriceComparison,
   comparePrices,
+  getMyProducts,
+  getProductsByVendor,
 } from "../controllers/productControllers.js";
 import {
   protectedRoutes,
@@ -24,6 +26,8 @@ router.get("/featured", getFeaturedProducts);
 router.get("/category/:category", getProductByCategory);
 router.get("/recommendations", getRecommendedProducts);
 router.get("/compare/:id", comparePrices);
+router.get("/my-products", protectedRoutes, adminRoute, getMyProducts);
+router.get("/vendor/:vendorId", getProductsByVendor);
 router.get("/:id", getSingleProduct);
 router.post("/", protectedRoutes, adminRoute, createProducts);
 router.patch("/:id", protectedRoutes, adminRoute, toggleFeaturedProduct);

@@ -3,6 +3,7 @@ import { ShoppingCart, UserPlus, LogIn, LogOut, Lock, Mic, Search, Menu, X } fro
 import { Link, useNavigate } from "react-router-dom";
 import { useUserStore } from "../store/useUserStore";
 import { useCartStore } from "../store/useCartStore";
+import NotificationBell from "./NotificationBell";
 
 const Navbar = () => {
 	const { user, logout } = useUserStore();
@@ -80,6 +81,8 @@ const Navbar = () => {
 								)}
 							</Link>
 						)}
+
+						{isAdmin && <NotificationBell />}
 
 						{isAdmin && (
 							<Link
