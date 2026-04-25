@@ -156,7 +156,8 @@ export const refreshToken = async (req, res) => {
     res.cookie("accessToken", accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      // Needed so session survives Stripe-hosted redirect back to app.
+      sameSite: "lax",
       maxAge: 15 * 60 * 1000,
     });
 
